@@ -11,7 +11,7 @@ const registerUser = AsyncHandler( async (req , res) => {
         throw new ApiError(400 , "All field are required.")
     }
 
-    const existingUser = User.findOne({
+    const existingUser = await User.findOne({
         $or : [{username} , {email}]
     })
 
@@ -33,7 +33,7 @@ const registerUser = AsyncHandler( async (req , res) => {
         throw new ApiError(400 , "Avatar is required.")
     }
 
-    const user = User.create({
+    const user = await User.create({
         fullname,
         avatar : avatar.url,
         coverImg : coverImg?.url || "",
@@ -42,7 +42,7 @@ const registerUser = AsyncHandler( async (req , res) => {
         username : username.toLowerCase()
     })
 
-    const checkUser = User.findById(user._id).select(
+    const checkUser = await User.findById(user._id).select(
         "-password -refreshToken"
     )
 
@@ -63,7 +63,7 @@ const loginUser = AsyncHandler(async (req , res) => {
         throw new ApiError(400 , "All field are required.")
     }
 
-    const user = User.findOne({email});
+    const user = await User.findOne({email});
 
     if (!user) {
         throw new ApiError(404 , "User doesnot exist.")

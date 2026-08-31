@@ -4,7 +4,7 @@ import { User } from "../models/user.model.js"
 import { uploadFile } from "../utils/cloudinaryService.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
 
-const registerUser = AsyncHandler( async (req , res) => {
+const registerUser = AsyncHandler( async (req , res , next) => {
     const {username , email , password , fullname} = req.body;
 
     if ([username , email , password , fullname].some((field) => field?.trim() === "")) {
@@ -20,7 +20,13 @@ const registerUser = AsyncHandler( async (req , res) => {
     }
 
     const avatarPath = req.files?.avatar[0]?.path;
-    const coverImgPath = req.files.coverImg[0]?.path;
+    // const coverImgPath = req.files?.coverImg[0]?.path;
+
+    let coverImgPath;
+
+    if (req.files && Array.isArray(req.files.coverImg) && req.files.coverImg.length > 0) {
+        coverImgPath = req.files.coverImg[0].path;
+    }
 
     if (!avatarPath) {
         throw new ApiError(400 , "Avatar is required.")
@@ -35,7 +41,7 @@ const registerUser = AsyncHandler( async (req , res) => {
 
     const user = await User.create({
         fullname,
-        avatar : avatar.url,
+        avatar : avatar?.secure_url,
         coverImg : coverImg?.url || "",
         email,
         password,
@@ -47,7 +53,7 @@ const registerUser = AsyncHandler( async (req , res) => {
     )
 
     if(!checkUser) {
-        throw new ApiError(500 , "Something went wrong while  registering user.")
+        throw new ApiError(500 , "Something went wrong while registering user.")
     }
 
     return res.status(201).json(
@@ -56,6 +62,7 @@ const registerUser = AsyncHandler( async (req , res) => {
 
 })
 
+// login controller
 const loginUser = AsyncHandler(async (req , res) => {
     const {email , password} = req.body;
 

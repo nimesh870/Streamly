@@ -5,8 +5,8 @@ import "dotenv/config"
 const uploadFile = async (localFilePath) => {
     cloudinary.config({
         cloud_name : process.env.CLOUDINARY_CLOUD_NAME,
-        api_key : CLOUDINARY_APIKEY,
-        api_secret : CLOUDINARY_API_SECRET
+        api_key : process.env.CLOUDINARY_APIKEY,
+        api_secret : process.env.CLOUDINARY_API_SECRET
     });
 
     try {
@@ -16,7 +16,7 @@ const uploadFile = async (localFilePath) => {
        const response = await cloudinary.uploader.upload(localFilePath , {
             resource_type : "auto"
         })
-        console.log("File uploaded successfully.");
+        fs.unlinkSync(localFilePath)
         return response;
 
     } catch (error) {

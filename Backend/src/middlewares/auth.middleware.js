@@ -1,7 +1,7 @@
-import { ApiError } from "../utils/ApiError";
-import { AsyncHandler } from "../utils/AsyncHandler";
+import { ApiError } from "../utils/ApiError.js";
+import { AsyncHandler } from "../utils/AsyncHandler.js";
 import jwt from "jsonwebtoken";
-import { User } from "../models/user.model";
+import { User } from "../models/user.model.js";
 
 export const verifyJWT = AsyncHandler( async (req , _ , next) => {
 try {
@@ -22,6 +22,6 @@ try {
         req.user = user;
         next();
 } catch (error) {
-    throw new ApiError(401 , error.message || "Invalid token.")
-}
+    throw new ApiError(401 , error?.message || "Invalid token.")
+    }
 })

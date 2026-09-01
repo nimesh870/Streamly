@@ -68,7 +68,7 @@ const registerUser = AsyncHandler( async (req , res , next) => {
     })
 
     const checkUser = await User.findById(user._id).select(
-        "-password -refreshToken"
+        "-refreshToken"
     )
 
     if(!checkUser) {
@@ -89,7 +89,7 @@ const loginUser = AsyncHandler(async (req , res) => {
         throw new ApiError(400 , "All field are required.")
     }
 
-    const user = await User.findOne({email});
+    const user = await User.findOne({email}).select("+password");
 
     if (!user) {
         throw new ApiError(404 , "User doesnot exist.")
@@ -103,20 +103,27 @@ const loginUser = AsyncHandler(async (req , res) => {
 
     const {accessToken , refreshToken} = await generateAccessAndRefreshToken(user._id);
 
-    const loggedInUser = await user.select("-password -refreshToken");
+    // const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
+    const loggedInUser = {
+        _id : user._id,
+        username : user.username,
+        email : user.email,
+        fullname : user.fullname,
+        avatar : user.avatar,
+        coverImg : user.coverImg
+    }
 
     const options = {
         httpOnly : true,
-        secrure : true
+        secure : true
     }
 
-    res.status(200)
-    .cookies("accessToken" , accessToken , options)
-    .cookies("refreshToken" , refreshToken , options)
+    return res.status(200)
+    .cookie("accessToken" , accessToken , options)
+    .cookie("refreshToken" , refreshToken , options)
     .json(
         new ApiResponse(200 , {
             accessToken,
-            refreshToken,
             loggedInUser
         } , "Logged In successfully.")
     )
@@ -131,7 +138,7 @@ const logoutUser = AsyncHandler(async (req , res) => {
             $set : {refreshToken : undefined}
         }, 
         {
-            new : true
+            returnDocument: 'after'
         }
     )
 
@@ -140,7 +147,7 @@ const logoutUser = AsyncHandler(async (req , res) => {
         secure : true
     }
 
-    res
+    return res
     .status(200)
     .clearCookie("accessToken" , options)
     .clearCookie("refreshToken" , options)

@@ -224,11 +224,35 @@ const getCurrentUser = AsyncHandler( async (req , res) => {
     )
 })
 
+const updateAvatar = AsyncHandler( async (req , res) => {
+    const avatarLocalpath = req.file?.path;
+
+    if (!avatarLocalpath) {
+        throw new ApiError(400 , "Avatar path not found.")
+    }
+
+    const avatar = await uploadFile(avatarLocalpath);
+
+    if (!avatar.url) {
+        throw new ApiError(400 , "Error while uploading on avatar.")
+    }
+
+    await findByIdAndUpdate(req.user?._id,
+        {
+            $set : {avatar : avatar.url}
+        },
+        {
+            returnDocument : "after"
+        }
+    )
+})
+
 export {
     registerUser,
     loginUser,
     logoutUser,
     refreshAccessToken,
     changeCurrentPassword,
-    getCurrentUser
+    getCurrentUser,
+    updateAvatar
 }

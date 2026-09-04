@@ -245,6 +245,33 @@ const updateAvatar = AsyncHandler( async (req , res) => {
             returnDocument : "after"
         }
     )
+
+    return res.status(200).json(
+        new ApiResponse(200 , avatar.url , "Avatar updated successfully.")
+    )
+})
+
+const updateCoverImg = AsyncHandler( async (req , res) => {
+    const coverImgLocalPath = req.file?.path;
+
+    if (!coverImgLocalPath) {
+        throw new ApiError(400 , "Cover image path not found.")
+    }
+
+    const coverImage = await uploadFile(coverImgLocalPath)
+
+    await User.findByIdAndUpdate(req.user?._id , 
+        {
+            $set : {coverImg : coverImage.url}
+        },
+        {
+            returnDocument : "after"
+        }
+    )
+
+    return res.status(200).json(
+        new ApiResponse(200 , coverImage.url , "Cover image updated successfully")
+    )
 })
 
 export {
@@ -254,5 +281,6 @@ export {
     refreshAccessToken,
     changeCurrentPassword,
     getCurrentUser,
-    updateAvatar
+    updateAvatar,
+    updateCoverImg
 }

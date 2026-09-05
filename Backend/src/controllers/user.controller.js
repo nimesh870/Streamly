@@ -1,7 +1,7 @@
 import { AsyncHandler } from "../utils/AsyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js"
-import { uploadFile } from "../utils/cloudinaryService.js"
+import { deleteFile, uploadFile } from "../utils/cloudinaryService.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 // generating tokens
@@ -60,8 +60,16 @@ const registerUser = AsyncHandler( async (req , res , next) => {
 
     const user = await User.create({
         fullname,
-        avatar : avatar?.secure_url,
-        coverImg : coverImg?.url || "",
+        avatar : {
+            url : avatar?.secure_url,
+            public_id : avatar?.public_id
+        },
+
+        coverImg : {
+            url : coverImg?.secure_url,
+            public_id : coverImg?.public_id
+        },
+
         email,
         password,
         username : username.toLowerCase()
@@ -154,6 +162,7 @@ const logoutUser = AsyncHandler(async (req , res) => {
     .json(new ApiResponse(200 , "User logged out successfully."))
 })
 
+// controller for updating access token
 const refreshAccessToken = AsyncHandler( async (req , res) => {
     const incomingRefreshToken = req.cookies?.refreshToken;
 
@@ -191,6 +200,7 @@ const refreshAccessToken = AsyncHandler( async (req , res) => {
     }
 })
 
+// controller for updating password
 const changeCurrentPassword = AsyncHandler( async (req , res) => {
     const {currentPassword , newPassword , confirmPassword} = req.body;
 
@@ -218,12 +228,14 @@ const changeCurrentPassword = AsyncHandler( async (req , res) => {
     )
 })
 
+// controller for fetching current user
 const getCurrentUser = AsyncHandler( async (req , res) => {
     return res.status(200).json(
         new ApiResponse(200 , req.user , "Current user fetched.")
     )
 })
 
+// controller for updating avatar
 const updateAvatar = AsyncHandler( async (req , res) => {
     const avatarLocalpath = req.file?.path;
 
@@ -231,27 +243,45 @@ const updateAvatar = AsyncHandler( async (req , res) => {
         throw new ApiError(400 , "Avatar path not found.")
     }
 
-    const avatar = await uploadFile(avatarLocalpath);
+    const user = await findById(req.user?._id);
 
-    if (!avatar.url) {
-        throw new ApiError(400 , "Error while uploading on avatar.")
+    if (!user) {
+        throw new ApiError(404 , "User not found.")
     }
 
-    await findByIdAndUpdate(req.user?._id,
+    const prevAvatarPublicId = user.avatar?.public_id;
+
+    const updatedAvatar = await uploadFile(avatarLocalpath);
+
+    if (!updatedAvatar) {
+        throw new ApiError(400 , "Error while uploading avatar.")
+    }
+
+    await findByIdAndUpdate(req.user?._id, 
         {
-            $set : {avatar : avatar.url}
+            $set : {
+                avatar : {
+                    url : updatedAvatar?.secure_url,
+                    public_id : updatedAvatar?.public_id
+                }
+            }
         },
+
         {
             returnDocument : "after"
         }
     )
 
+    if (prevAvatarPublicId) {
+        await deleteFile(prevAvatarPublicId)
+    }
+
     return res.status(200).json(
-        new ApiResponse(200 , avatar.url , "Avatar updated successfully.")
+        new ApiResponse(200 , updatedAvatar.url , "Avatar updated successfully.")
     )
 })
 
-//todo- delete images from cloudinary after updating them
+// controller for updating cover image
 const updateCoverImg = AsyncHandler( async (req , res) => {
     const coverImgLocalPath = req.file?.path;
 
@@ -259,19 +289,41 @@ const updateCoverImg = AsyncHandler( async (req , res) => {
         throw new ApiError(400 , "Cover image path not found.")
     }
 
-    const coverImage = await uploadFile(coverImgLocalPath)
+    const user = await findById(req.user?._id);
 
-    await User.findByIdAndUpdate(req.user?._id , 
+    if (!user) {
+        throw new ApiError(404 , "User not found.")
+    }
+
+    const prevCoverImgPublicId = user.coverImg?.public_id
+
+    const updateCoverImg = await uploadFile(coverImgLocalPath);
+
+    if (!updateCoverImg) {
+        throw new ApiError(400 , "Error while updating cover image.")
+    }
+
+    await findByIdAndUpdate(req.user?._id ,
         {
-            $set : {coverImg : coverImage.url}
+            $set : {
+                coverImg : {
+                    url : updateCoverImg?.secure_url,
+                    public_id : updateCoverImg?.public_id
+                }
+            }
         },
+
         {
             returnDocument : "after"
         }
     )
 
+    if (prevCoverImgPublicId) {
+        await deleteFile(prevCoverImgPublicId)
+    }
+
     return res.status(200).json(
-        new ApiResponse(200 , coverImage.url , "Cover image updated successfully")
+        new ApiResponse(200 , updateCoverImg?.url , "Cover image updated successfully")
     )
 })
 

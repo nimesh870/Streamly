@@ -251,6 +251,7 @@ const updateAvatar = AsyncHandler( async (req , res) => {
     )
 })
 
+//todo- delete images from cloudinary after updating them
 const updateCoverImg = AsyncHandler( async (req , res) => {
     const coverImgLocalPath = req.file?.path;
 
@@ -274,6 +275,81 @@ const updateCoverImg = AsyncHandler( async (req , res) => {
     )
 })
 
+const getCurrentUserProfile = AsyncHandler( async (req , res) => {
+    const {username} = req.params;
+
+    if (!username) {
+        throw new ApiError(400 , "username not found.")
+    }
+
+    const channel = await User.aggregate([
+        {
+            $match : {
+                username : username?.toLowerCase()
+            }
+        },
+
+        {
+            $lookup : {
+                from : "subscriptions",
+                localField : "_id",
+                foreignField : "channel",
+                as : "subscribers"
+            }
+        },
+
+        {
+            $lookup : {
+                from : "subscriptions",
+                localField : "_id",
+                foreignField : "subscriber",
+                as : "Subscribed"
+            }
+        },
+
+        {
+            $addFields : {
+                subscribersCount : {
+                    $size : "$subscribers"
+                },
+                channelsSubscribedToCount : {
+                    $size : "$subscribed"
+                },
+                isSubscribed : {
+                    $cond : {
+                        if : {$in : [req.users?._id , "$subscribed.subscriber"]},
+                        then : true,
+                        else : false
+                    }
+                }
+            }
+        },
+
+        {
+            $project : {
+                fullname : 1,
+                username : 1,
+                subscribersCount : 1,
+                channelsSubscribedToCount : 1,
+                isSubscribed : 1,
+                avatar : 1,
+                coverImg : 1
+            }
+        }
+    ])
+
+    if (!channel?.length) {
+        throw new ApiError(404 , "Channel not found")
+    }
+
+    console.log(channel)
+
+    return res.status(200).json(
+        new ApiResponse(200 , channel[0] , "User channel fetched successfully.")
+    )
+})
+
+
 export {
     registerUser,
     loginUser,
@@ -282,5 +358,6 @@ export {
     changeCurrentPassword,
     getCurrentUser,
     updateAvatar,
-    updateCoverImg
+    updateCoverImg,
+    getCurrentUserProfile
 }

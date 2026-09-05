@@ -243,7 +243,7 @@ const updateAvatar = AsyncHandler( async (req , res) => {
         throw new ApiError(400 , "Avatar path not found.")
     }
 
-    const user = await findById(req.user?._id);
+    const user = await User.findById(req.user?._id);
 
     if (!user) {
         throw new ApiError(404 , "User not found.")
@@ -257,7 +257,7 @@ const updateAvatar = AsyncHandler( async (req , res) => {
         throw new ApiError(400 , "Error while uploading avatar.")
     }
 
-    await findByIdAndUpdate(req.user?._id, 
+    await User.findByIdAndUpdate(req.user?._id, 
         {
             $set : {
                 avatar : {
@@ -289,7 +289,7 @@ const updateCoverImg = AsyncHandler( async (req , res) => {
         throw new ApiError(400 , "Cover image path not found.")
     }
 
-    const user = await findById(req.user?._id);
+    const user = await User.findById(req.user?._id);
 
     if (!user) {
         throw new ApiError(404 , "User not found.")
@@ -303,7 +303,7 @@ const updateCoverImg = AsyncHandler( async (req , res) => {
         throw new ApiError(400 , "Error while updating cover image.")
     }
 
-    await findByIdAndUpdate(req.user?._id ,
+    await User.findByIdAndUpdate(req.user?._id ,
         {
             $set : {
                 coverImg : {

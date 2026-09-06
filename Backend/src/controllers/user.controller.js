@@ -328,7 +328,7 @@ const updateCoverImg = AsyncHandler( async (req , res) => {
     )
 })
 
-const getCurrentUserProfile = AsyncHandler( async (req , res) => {
+const getUserChannelProfile = AsyncHandler( async (req , res) => {
     const {username} = req.params;
 
     if (!username?.trim()) {
@@ -466,6 +466,6 @@ export {
     getCurrentUser,
     updateAvatar,
     updateCoverImg,
-    getCurrentUserProfile,
+    getUserChannelProfile,
     getWatchHistory
 }

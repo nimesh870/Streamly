@@ -56,7 +56,7 @@ const registerUser = AsyncHandler( async (req , res , next) => {
     const coverImg = await uploadFile(coverImgPath);
 
     if (!avatar) {
-        throw new ApiError(400 , "Avatar is required.")
+        throw new ApiError(400 , "Error while uploading avatar.")
     }
 
     const user = await User.create({
@@ -358,7 +358,7 @@ const getUserChannelProfile = AsyncHandler( async (req , res) => {
                 from : "subscriptions",
                 localField : "_id",
                 foreignField : "subscriber",
-                as : "Subscribed"
+                as : "subscribed"
             }
         },
 
@@ -393,13 +393,11 @@ const getUserChannelProfile = AsyncHandler( async (req , res) => {
         }
     ])
 
-    console.log(channel)
+    // console.log(channel[0])
 
     if (!channel?.length) {
         throw new ApiError(404 , "Channel not found")
     }
-
-    console.log(channel)
 
     return res.status(200).json(
         new ApiResponse(200 , channel[0] , "User channel fetched successfully.")

@@ -1,11 +1,12 @@
 import { User } from "../models/user.model.js";
 import { Video } from "../models/video.model.js";
-import { uploadFile } from "../utils/cloudinaryService.js";
+import { deleteFile, uploadFile } from "../utils/cloudinaryService.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { AsyncHandler } from "../utils/AsyncHandler.js"
 import { Video } from "../models/video.model.js";
 
+// upload video controller
 const publishVideo = AsyncHandler( async (req , res) => {
     const {title , description} = req.body;
 
@@ -50,6 +51,35 @@ const publishVideo = AsyncHandler( async (req , res) => {
 
 })
 
+// delete video controller
+const deleteVideo = AsyncHandler( async(req , res) => {
+    const video = await Video.findOne({
+        _id : req.body?._id,
+        owner : req.user._id
+    })
+
+    if (!video) {
+        throw new ApiError(404 , "Video not found.")
+    }
+
+    const videoDeleteResult = await deleteFile(video.videoDetails.public_id , "video");
+    const thumbnailDeleteResult = await deleteFile(video.thumbnailDetails.public_id);
+
+    if (
+        videoDeleteResult?.result !== "ok" ||
+        thumbnailDeleteResult?.result !== "ok"
+    ) {
+        throw new ApiError(500 , "Failed to delete video files from Cloudinary.")
+    }
+
+    await Video.deleteOne({_id : video._id});
+
+    return res.status(200).json(
+        new ApiResponse(200 , "Video deleted successfully.")
+    )
+})
+
 export {
     publishVideo,
+    deleteVideo,
 }

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { upload } from "../middlewares/multer.middleware";
+import { verifyJWT } from "../middlewares/auth.middleware";
 import { publishVideo } from "../controllers/video.controller";
 
 const videoRouter = Router();
@@ -15,7 +16,7 @@ router.route("/upload-videos").post(
             maxCount : 1
         }
     ]),
-    publishVideo
+    verifyJWT , publishVideo
 )
 
 export default videoRouter;

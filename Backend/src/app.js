@@ -21,4 +21,10 @@ app.use(express.static("public"))
 import router from "./routes/user.route.js";
 app.use("/api/v1/users" , router)
 
+// import and configure video router
+import videoRouter from "./routes/video.route.js";
+app.use("/api/v1/watch" , videoRouter)
+
+
+
 export default app;

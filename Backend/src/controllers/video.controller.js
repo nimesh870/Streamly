@@ -111,7 +111,7 @@ const updateVideo = AsyncHandler( async (req , res) => {
     let newThumbnailPublicId = null;
 
     if (hasThumbnailUpdate) {
-        oldThumbnaiPublicId = video.thumbnail?.public_id
+        oldThumbnailPublicId = video.thumbnail?.public_id
 
         const uploadNewThumbnail = await uploadFile(req.file?.path)
 
@@ -137,7 +137,7 @@ const updateVideo = AsyncHandler( async (req , res) => {
         }
 
         if (oldThumbnailPublicId) {
-            const deleteResult = await deleteFile(oldThumbnai/PublicId)
+            const deleteResult = await deleteFile(oldThumbnailPublicId)
 
             if (deleteResult.result !== "ok" || deleteResult.result === "not found") {
                 throw new ApiError(500 , "Error while deleting thumbnail from cloudinary.")

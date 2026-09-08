@@ -53,8 +53,10 @@ const publishVideo = AsyncHandler( async (req , res) => {
 
 // delete video controller
 const deleteVideo = AsyncHandler( async(req , res) => {
+    const { videoId } = req.params;
+
     const video = await Video.findOne({
-        _id : req.body?._id,
+        _id : videoId,
         owner : req.user._id
     })
 
@@ -82,9 +84,10 @@ const deleteVideo = AsyncHandler( async(req , res) => {
 // update video controller
 const updateVideo = AsyncHandler( async (req , res) => {
     const {newTitle , newDescription} = req.body;
+    const { videoId } = req.params;
 
     const video = await Video.findOne({
-        _id : req.body?._id,
+        _id : videoId,
         owner : req.user._id
     })
 
@@ -148,8 +151,24 @@ const updateVideo = AsyncHandler( async (req , res) => {
     )
 })
 
+// fetch video by id
+const getVideoById = AsyncHandler( async (req , res) => {
+    const { videoId } = req.params;
+
+    const video = await Video.findById(videoId);
+
+    if (!video) {
+        throw new ApiError(404 , "No video found.")
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200 , video , "Video fetched successfully.")
+    )
+})
+
 export {
     publishVideo,
     deleteVideo,
-    updateVideo
+    updateVideo,
+    getVideoById
 }

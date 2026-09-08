@@ -79,7 +79,77 @@ const deleteVideo = AsyncHandler( async(req , res) => {
     )
 })
 
+// update video controller
+const updateVideo = AsyncHandler( async (req , res) => {
+    const {newTitle , newDescription} = req.body;
+
+    const video = await Video.findOne({
+        _id : req.body?._id,
+        owner : req.user._id
+    })
+
+    if (!video) {
+        throw new ApiError(404, "Video not found.");
+    }
+
+    const hasTitleUpdated = typeof newTitle === "String" && newTitle.trim();
+    const hasDescriptionUpdated = typeof newDescription === "String" && newDescription.trim();
+    const hasThumbnailUpdate = Boolean(req.file?.path);
+
+    if (hasTitleUpdated) {
+        video.title = newTitle.trim();
+    }
+
+    if (hasDescriptionUpdated) {
+        video.description = newDescription.trim();
+    }
+
+    let oldThumbnailPublicId = null;
+    let newThumbnailPublicId = null;
+
+    if (hasThumbnailUpdate) {
+        oldThumbnaiPublicId = video.thumbnail?.public_id
+
+        const uploadNewThumbnail = await uploadFile(req.file?.path)
+
+        if (!uploadNewThumbnail) {
+            throw new ApiError(500 , "Error while uploading thumbnail.")
+        }
+
+        newThumbnailPublicId = uploadNewThumbnail.public_id;
+
+        video.thumbnail = {
+            url : uploadNewThumbnail?.secure_url,
+            public_id : uploadNewThumbnail.public_id
+        }
+
+        try {
+            await video.save();
+        } catch (error) {
+            if (!newThumbnailPublicId) {
+                await deleteFile(newThumbnailPublicId, "image");
+            }
+
+            throw new ApiError(400 , error.message)
+        }
+
+        if (oldThumbnailPublicId) {
+            const deleteResult = await deleteFile(oldThumbnai/PublicId)
+
+            if (deleteResult.result !== "ok" || deleteResult.result === "not found") {
+                throw new ApiError(500 , "Error while deleting thumbnail from cloudinary.")
+            }
+
+        }
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200 , "Video updated successfully.")
+    )
+})
+
 export {
     publishVideo,
     deleteVideo,
+    updateVideo
 }

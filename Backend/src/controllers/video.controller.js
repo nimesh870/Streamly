@@ -1,10 +1,8 @@
-import { User } from "../models/user.model.js";
 import { Video } from "../models/video.model.js";
 import { deleteFile, uploadFile } from "../utils/cloudinaryService.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { AsyncHandler } from "../utils/AsyncHandler.js"
-import { Video } from "../models/video.model.js";
 import mongoose from "mongoose";
 
 // upload video controller
@@ -18,12 +16,14 @@ const publishVideo = AsyncHandler( async (req , res) => {
     const videoPath = req.files.video[0]?.path;
     const thumbnailPath = req.files.thumbnail[0]?.path;
 
+    console.log(req.files)
+
     if ([videoPath , thumbnailPath].some((field) => field?.trim() === "")) {
         throw new ApiError(400 , "Video or thumbnail file is missing.")
     }
 
-    const video = await uploadFile(videoPath);
-    const thumbnail = await uploadFile(thumbnailPath)
+    const video = await uploadFile(videoPath , "video");
+    const thumbnail = await uploadFile(thumbnailPath , "image");
 
     if (!video || !thumbnail) {
         throw new ApiError(400 , "Video or thumbnail upload failed.")
@@ -43,7 +43,8 @@ const publishVideo = AsyncHandler( async (req , res) => {
             public_id : thumbnail?.public_id
         },
 
-        duration : video?.duration
+        duration : video?.duration,
+        owner : req.user._id
     })
 
     return res.status(200).json(
@@ -114,7 +115,7 @@ const updateVideo = AsyncHandler( async (req , res) => {
     if (hasThumbnailUpdate) {
         oldThumbnailPublicId = video.thumbnail?.public_id
 
-        const uploadNewThumbnail = await uploadFile(req.file?.path)
+        const uploadNewThumbnail = await uploadFile(req.file?.path ,"image")
 
         if (!uploadNewThumbnail) {
             throw new ApiError(500 , "Error while uploading thumbnail.")

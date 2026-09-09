@@ -223,10 +223,36 @@ const getAllVideos = AsyncHandler( async (req , res) => {
     )
 })
 
+// toggle published
+const togglePublished = AsyncHandler( async (req , res) => {
+    const { videoId } = req.params;
+
+    if (!videoId) {
+        throw new ApiError(400 , "Video Id is required.")
+    }
+
+    const video = await Video.findOne({
+        _id : videoId,
+        owner : req.user._id
+    })
+
+    if (!video) {
+        throw new ApiError(404 , "No video found from database.")
+    }
+
+    video.isPublished = !video.isPublished;
+    await video.save();
+
+    return res.status(200).json(
+        new ApiResponse(200 , {isPublished : video.isPublished} , "Publish status updated.")
+    )
+})
+
 export {
     publishVideo,
     deleteVideo,
     updateVideo,
     getVideoById,
-    getAllVideos
+    getAllVideos,
+    togglePublished
 }

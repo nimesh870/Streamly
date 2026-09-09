@@ -5,6 +5,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { AsyncHandler } from "../utils/AsyncHandler.js"
 import { Video } from "../models/video.model.js";
+import mongoose from "mongoose";
 
 // upload video controller
 const publishVideo = AsyncHandler( async (req , res) => {
@@ -166,9 +167,66 @@ const getVideoById = AsyncHandler( async (req , res) => {
     )
 })
 
+// fetch all videos
+const getAllVideos = AsyncHandler( async (req , res) => {
+    const {userId , page=1 , limit=20 , sortBy = "createdAt" , sortType = "newest"} = req.query;
+
+    const pageNumber = Number(page);
+    const limitNumber = Number(limit);
+
+    if (pageNumber < 1 || !Number.isInteger(pageNumber)) {
+        throw new ApiError(400 , "Page number must be a positive integer.")
+    }
+
+    if (!Number.isInteger(limitNumber) || limitNumber < 1 || limitNumber > 100) {
+        throw new ApiError(400 , "Limit must be between 1 and 100 as a positive integer.")
+    }
+
+    const allowedSortFields = [
+        "createdAt",
+        "views",
+        "title"
+    ]
+
+    if(!allowedSortFields.includes(sortBy)) {
+        throw new ApiError(400 , "Invalid sort field.")
+    }
+
+    const allowedSortTypes = ["newest" , "oldest"];
+
+    if (!allowedSortTypes.includes(sortType)) {
+        throw new ApiError(400 , "Invalid sort type.")
+    }
+
+    if (userId && !mongoose.Types.ObjectId.isValid(userId)) {
+        throw new ApiError(400 , "Invalid user id.")
+    }
+
+    const skipPage = (pageNumber - 1) * limitNumber;
+    const sortField = sortBy || "createdAt";
+    const sortOrder = sortType === "oldest" ? 1 : -1;
+
+    const filter = {};
+
+    if (userId) {
+        filter.owner = userId
+    }
+
+    const videos = await Video.find(filter).sort({[sortField] : sortOrder , _id : sortOrder}).skip(skipPage).limit(limitNumber)
+
+    if (!videos) {
+        throw new ApiError(404 , "No vidoes found.")
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200 , videos , "All vidoes fetched.")
+    )
+})
+
 export {
     publishVideo,
     deleteVideo,
     updateVideo,
-    getVideoById
+    getVideoById,
+    getAllVideos
 }

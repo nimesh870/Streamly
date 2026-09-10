@@ -105,10 +105,12 @@ const updateVideo = AsyncHandler( async (req , res) => {
 
     if (hasTitleUpdated) {
         video.title = newTitle.trim();
+        await video.save()
     }
 
     if (hasDescriptionUpdated) {
         video.description = newDescription.trim();
+        await video.save()
     }
 
     let oldThumbnailPublicId = null;

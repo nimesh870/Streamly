@@ -23,7 +23,7 @@ app.use("/api/v1/users" , router)
 
 // import and configure video router
 import videoRouter from "./routes/video.route.js";
-app.use("/api/v1/watch" , videoRouter)
+app.use("/api/v1/videos" , videoRouter)
 
 
 

@@ -16,8 +16,6 @@ const publishVideo = AsyncHandler( async (req , res) => {
     const videoPath = req.files.video[0]?.path;
     const thumbnailPath = req.files.thumbnail[0]?.path;
 
-    console.log(req.files)
-
     if ([videoPath , thumbnailPath].some((field) => field?.trim() === "")) {
         throw new ApiError(400 , "Video or thumbnail file is missing.")
     }
@@ -97,8 +95,8 @@ const updateVideo = AsyncHandler( async (req , res) => {
         throw new ApiError(404, "Video not found.");
     }
 
-    const hasTitleUpdated = typeof newTitle === "String" && newTitle.trim();
-    const hasDescriptionUpdated = typeof newDescription === "String" && newDescription.trim();
+    const hasTitleUpdated = typeof newTitle === "string" && newTitle.trim();
+    const hasDescriptionUpdated = typeof newDescription === "string" && newDescription.trim();
     const hasThumbnailUpdate = Boolean(req.file?.path);
 
     if (hasTitleUpdated) {
@@ -113,7 +111,7 @@ const updateVideo = AsyncHandler( async (req , res) => {
     let newThumbnailPublicId = null;
 
     if (hasThumbnailUpdate) {
-        oldThumbnailPublicId = video.thumbnail?.public_id
+        oldThumbnailPublicId = video.thumbnailDetails?.public_id
 
         const uploadNewThumbnail = await uploadFile(req.file?.path ,"image")
 
@@ -123,15 +121,15 @@ const updateVideo = AsyncHandler( async (req , res) => {
 
         newThumbnailPublicId = uploadNewThumbnail.public_id;
 
-        video.thumbnail = {
+        video.thumbnailDetails = {
             url : uploadNewThumbnail?.secure_url,
-            public_id : uploadNewThumbnail.public_id
+            public_id : uploadNewThumbnail?.public_id
         }
 
         try {
             await video.save();
         } catch (error) {
-            if (!newThumbnailPublicId) {
+            if (newThumbnailPublicId) {
                 await deleteFile(newThumbnailPublicId, "image");
             }
 
@@ -139,10 +137,10 @@ const updateVideo = AsyncHandler( async (req , res) => {
         }
 
         if (oldThumbnailPublicId) {
-            const deleteResult = await deleteFile(oldThumbnailPublicId)
+            const deleteResult = await deleteFile(oldThumbnailPublicId , "image")
 
             if (deleteResult.result !== "ok" || deleteResult.result === "not found") {
-                throw new ApiError(500 , "Error while deleting thumbnail from cloudinary.")
+                throw new ApiError(500 , `Error while deleting thumbnail from cloudinary. Delete result : ${deleteResult.result}`)
             }
 
         }

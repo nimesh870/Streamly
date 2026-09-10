@@ -86,6 +86,10 @@ const updateVideo = AsyncHandler( async (req , res) => {
     const {newTitle , newDescription} = req.body;
     const { videoId } = req.params;
 
+    if (!videoId) {
+        throw new ApiError(400 , "No video id found.")
+    }
+
     const video = await Video.findOne({
         _id : videoId,
         owner : req.user._id
@@ -154,6 +158,10 @@ const updateVideo = AsyncHandler( async (req , res) => {
 // fetch video by id
 const getVideoById = AsyncHandler( async (req , res) => {
     const { videoId } = req.params;
+
+    if (!videoId) {
+        throw new ApiError(400 , "No video id found.")
+    }
 
     const video = await Video.findById(videoId);
 
@@ -225,7 +233,7 @@ const getAllVideos = AsyncHandler( async (req , res) => {
 // toggle published
 const togglePublished = AsyncHandler( async (req , res) => {
     const { videoId } = req.params;
-
+    
     if (!videoId) {
         throw new ApiError(400 , "Video Id is required.")
     }

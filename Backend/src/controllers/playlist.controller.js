@@ -112,7 +112,7 @@ const removeVideoFromPlaylist = AsyncHandler(async (req, res) => {
     const { playlistId } = req.params;
     const { videoId } = req.body;
 
-    if (!playlistId || !mongoose.Types.ObjectId.isValid(videoId)) {
+    if (!playlistId || !mongoose.Types.ObjectId.isValid(playlistId)) {
         throw new ApiError(400 , "Invalid playlist id.")
     }
 
@@ -153,6 +153,25 @@ const removeVideoFromPlaylist = AsyncHandler(async (req, res) => {
 })
 
 const deletePlaylist = AsyncHandler(async (req, res) => {
+    const { playlistId } = req.params;
+
+    if (!playlistId || !mongoose.Types.ObjectId.isValid(playlistId)) {
+        throw new ApiErrorp(400 , "Invalid playlist id.")
+    }
+    const playlist = await Playlist.findByIdAndDelete(
+        {
+            _id : playlistId,
+            owner : req.user._id
+        }
+    )
+
+    if (!playlist) {
+        throw new ApiError(404 , "Playlist not found or you don't own this playlist.");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200 , "Playlist deletion successful.")
+    )
 })
 
 const updatePlaylist = AsyncHandler(async (req, res) => {

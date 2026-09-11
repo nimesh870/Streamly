@@ -9,7 +9,7 @@ import mongoose from "mongoose";
 const publishVideo = AsyncHandler( async (req , res) => {
     const {title , description} = req.body;
 
-    if ([title , description].some((field) => field?.trim() === "")) {
+    if ([title , description].some((field) => typeof field !== "string" || field?.trim() === "")) {
         throw new ApiError(400 , "You must provide a title and description before uploading the video.")
     }
 
@@ -28,8 +28,8 @@ const publishVideo = AsyncHandler( async (req , res) => {
     }
 
     const uploadVideo = await Video.create({
-        title,
-        description,
+        title : title.trim(),
+        description : description.trim(),
 
         videoDetails : {
             url : video?.secure_url,

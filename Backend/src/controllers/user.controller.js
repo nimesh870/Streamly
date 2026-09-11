@@ -27,7 +27,7 @@ const generateAccessAndRefreshToken = async (userId) => {
 const registerUser = AsyncHandler( async (req , res , next) => {
     const {username , email , password , fullname} = req.body;
 
-    if ([username , email , password , fullname].some((field) => field?.trim() === "")) {
+    if ([username , email , password , fullname].some((field) => typeof field !== "string" || field?.trim() === "")) {
         throw new ApiError(400 , "All field are required.")
     }
 
@@ -60,7 +60,7 @@ const registerUser = AsyncHandler( async (req , res , next) => {
     }
 
     const user = await User.create({
-        fullname,
+        fullname : fullname.trim(),
         avatar : {
             url : avatar?.secure_url,
             public_id : avatar?.public_id
@@ -71,9 +71,9 @@ const registerUser = AsyncHandler( async (req , res , next) => {
             public_id : coverImg?.public_id
         },
 
-        email,
-        password,
-        username : username.toLowerCase()
+        email : email.trim(),
+        password : password.trim(),
+        username : username.toLowerCase().trim()
     })
 
     const checkUser = await User.findById(user._id).select(
@@ -94,7 +94,7 @@ const registerUser = AsyncHandler( async (req , res , next) => {
 const loginUser = AsyncHandler(async (req , res) => {
     const {email , password} = req.body;
 
-    if ([email , password].some((field) => field?.trim() === "")) {
+    if ([email , password].some((field) => typeof field !== "string" || field?.trim() === "")) {
         throw new ApiError(400 , "All field are required.")
     }
 
@@ -115,9 +115,9 @@ const loginUser = AsyncHandler(async (req , res) => {
     // const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
     const loggedInUser = {
         _id : user._id,
-        username : user.username,
-        email : user.email,
-        fullname : user.fullname,
+        username : user.username.trim(),
+        email : user.email.trim(),
+        fullname : user.fullname.trim(),
         avatar : user.avatar,
         coverImg : user.coverImg
     }
@@ -208,7 +208,7 @@ const refreshAccessToken = AsyncHandler( async (req , res) => {
 const changeCurrentPassword = AsyncHandler( async (req , res) => {
     const {currentPassword , newPassword , confirmPassword} = req.body;
 
-    if([currentPassword , newPassword , confirmPassword].some((field) => field?.trim() === "")) {
+    if([currentPassword , newPassword , confirmPassword].some((field) => typeof field !== "string" || field?.trim() === "")) {
         throw new ApiError(400 , "All fields are required.")
     }
 

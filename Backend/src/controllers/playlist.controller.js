@@ -18,6 +18,10 @@ const createPlaylist = AsyncHandler(async (req, res) => {
         owner : req.user._id
     })
 
+    if (!playlist) {
+        throw new ApiError(409 , "Failed to create playlist.")
+    }
+
     return res.status(201).json(
         new ApiResponse(201 , playlist , "Play successfully created.")
     )
@@ -29,8 +33,8 @@ const getUserPlaylists = AsyncHandler(async (req, res) => {
         owner : req.user._id
     })
 
-    if (!playlist) {
-        throw new ApiError(404 , "No playlist found.")
+    if (!getAllPlaylist) {
+        throw new ApiError(404 , "No playlist found or you dont own the playlist.")
     }
 
     return res.status(200).json(
@@ -41,7 +45,7 @@ const getUserPlaylists = AsyncHandler(async (req, res) => {
 const getPlaylistById = AsyncHandler(async (req, res) => {
     const { playlistId } = req.params;
 
-    if (!playlistId) {
+    if (!playlistId || mongoose.Types.ObjectId.isValid(playlistId)) {
         throw new ApiError(400 , "No playlist id found.")
     }
 

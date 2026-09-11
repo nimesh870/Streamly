@@ -23,6 +23,18 @@ const createPlaylist = AsyncHandler(async (req, res) => {
 })
 
 const getUserPlaylists = AsyncHandler(async (req, res) => {
+
+    const playlist = await Playlist.find({
+        owner : req.user._id
+    })
+
+    if (!playlist) {
+        throw new ApiError(404 , "No playlist found.")
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200 , playlist , "Playlist fetched successfully.")
+    )
 })
 
 const getPlaylistById = AsyncHandler(async (req, res) => {

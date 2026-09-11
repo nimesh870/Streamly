@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Playlist } from "../models/playlist.models.js"
 import { Video } from "../models/video.model.js";
 import { ApiError } from "../utils/ApiError.js";
@@ -59,6 +60,48 @@ const getPlaylistById = AsyncHandler(async (req, res) => {
 })
 
 const addVideoToPlaylist = AsyncHandler(async (req, res) => {
+    const { playlistId } = req.params;
+
+    const { videoId } = req.body;
+
+    if (!playlistId || mongoose.Types.ObjectId.isValid(playlistId)) {
+        throw new ApiError(400 , "Invalid playlist id.")
+    }
+
+    if (!videoId || mongoose.Types.ObjectId.isValid(videoId)) {
+        throw new ApiError(400 , "Invalid video id.")
+    }
+
+    const video = await Video.findById(videoId);
+
+    if (!video) {
+        throw new ApiError(404 , "Video not found.")
+    }
+
+    const playlist = await Playlist.findByIdAndUpdate(
+        {
+            _id : playlistId,
+            owner : req.user._id
+        },
+
+        {
+            $addToSet : {
+                videos : videoId
+            }
+        },
+
+        {
+            returnDocument : "after"
+        }
+    )
+
+    if (!playlist) {
+        throw new ApiError(404 , "Playlist not found or you dont own this playlist.")
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200 , playlist , "Video added to playlist.")
+    )
 })
 
 const removeVideoFromPlaylist = AsyncHandler(async (req, res) => {

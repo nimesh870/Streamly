@@ -156,7 +156,7 @@ const deletePlaylist = AsyncHandler(async (req, res) => {
     const { playlistId } = req.params;
 
     if (!playlistId || !mongoose.Types.ObjectId.isValid(playlistId)) {
-        throw new ApiErrorp(400 , "Invalid playlist id.")
+        throw new ApiError(400 , "Invalid playlist id.")
     }
     const playlist = await Playlist.findByIdAndDelete(
         {

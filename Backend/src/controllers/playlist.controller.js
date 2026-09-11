@@ -45,7 +45,7 @@ const getUserPlaylists = AsyncHandler(async (req, res) => {
 const getPlaylistById = AsyncHandler(async (req, res) => {
     const { playlistId } = req.params;
 
-    if (!playlistId || mongoose.Types.ObjectId.isValid(playlistId)) {
+    if (!playlistId || !mongoose.Types.ObjectId.isValid(playlistId)) {
         throw new ApiError(400 , "No playlist id found.")
     }
 
@@ -68,11 +68,11 @@ const addVideoToPlaylist = AsyncHandler(async (req, res) => {
 
     const { videoId } = req.body;
 
-    if (!playlistId || mongoose.Types.ObjectId.isValid(playlistId)) {
+    if (!playlistId || !mongoose.Types.ObjectId.isValid(playlistId)) {
         throw new ApiError(400 , "Invalid playlist id.")
     }
 
-    if (!videoId || mongoose.Types.ObjectId.isValid(videoId)) {
+    if (!videoId || !mongoose.Types.ObjectId.isValid(videoId)) {
         throw new ApiError(400 , "Invalid video id.")
     }
 
@@ -109,6 +109,47 @@ const addVideoToPlaylist = AsyncHandler(async (req, res) => {
 })
 
 const removeVideoFromPlaylist = AsyncHandler(async (req, res) => {
+    const { playlistId } = req.params;
+    const { videoId } = req.body;
+
+    if (!playlistId || !mongoose.Types.ObjectId.isValid(videoId)) {
+        throw new ApiError(400 , "Invalid playlist id.")
+    }
+
+    if (!videoId || !mongoose.Types.ObjectId.isValid(videoId)) {
+        throw new ApiError(400 , "Invalid video is.")
+    }
+
+    const video = await Video.findById(videoId);
+
+    if (!video) {
+        throw new ApiError(404 , "Video not found.")
+    }
+
+    const playlist = await Playlist.findByIdAndUpdate(
+        {
+            _id : playlistId,
+            owner : req.user._id
+        },
+
+        {
+            $pull : {
+                videos : videoId
+            }
+        },
+
+        {
+            returnDocument : "after"
+        }
+    )
+
+    if (!playlist) {
+        throw new ApiError(404 , "Playlist not found or you dont own this playlist.")
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200 , playlist , "video removed from playlist.")
+    )
 })
 
 const deletePlaylist = AsyncHandler(async (req, res) => {

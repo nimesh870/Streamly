@@ -25,6 +25,8 @@ app.use("/api/v1/users" , router)
 import videoRouter from "./routes/video.route.js";
 app.use("/api/v1/videos" , videoRouter)
 
-
+// import and configure playlist router
+import playlistRouter from "./routes/playlist.route.js";
+app.use("/api/v1/playlist" , playlistRouter)
 
 export default app;

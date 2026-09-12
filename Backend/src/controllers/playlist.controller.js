@@ -175,6 +175,36 @@ const deletePlaylist = AsyncHandler(async (req, res) => {
 })
 
 const updatePlaylist = AsyncHandler(async (req, res) => {
+    // update playlist and write the routes
+
+    const { newName , newDescription } = req.body;
+    const { playlistId } = req.params;
+
+    if ([newName , newDescription].some((field) => typeof field === "string" || field?.trim() === "")) {
+        throw new ApiError(400 , "Name and description are required.")
+    }
+
+    if (!playlistId || !mongoose.Types.ObjectId.isValid(playlistId)) {
+        throw new ApiError(400 , "Invalid playlist id.")
+    }
+
+    const playlist = await Playlist.findOne({
+        _id : playlistId,
+        owner : req.user._id
+    })
+
+    if (!playlist) {
+        throw new ApiError(404 , "Playlist not found.")
+    }
+
+    playlist.name = newName;
+    playlist.description = newDescription;
+    await playlist.save();
+
+    return res.status(200).json(
+        new ApiResponse(200 , playlist , "Playlist updated")
+    )
+
 })
 
 export {

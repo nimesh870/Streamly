@@ -177,10 +177,10 @@ const deletePlaylist = AsyncHandler(async (req, res) => {
 const updatePlaylist = AsyncHandler(async (req, res) => {
     // update playlist and write the routes
 
-    const { newName , newDescription } = req.body;
+    const { name , description } = req.body;
     const { playlistId } = req.params;
 
-    if ([newName , newDescription].some((field) => typeof field === "string" || field?.trim() === "")) {
+    if ([name , description].some((field) => typeof field === "string" || field?.trim() === "")) {
         throw new ApiError(400 , "Name and description are required.")
     }
 
@@ -197,8 +197,8 @@ const updatePlaylist = AsyncHandler(async (req, res) => {
         throw new ApiError(404 , "Playlist not found.")
     }
 
-    playlist.name = newName;
-    playlist.description = newDescription;
+    playlist.name = name;
+    playlist.description = description;
     await playlist.save();
 
     return res.status(200).json(

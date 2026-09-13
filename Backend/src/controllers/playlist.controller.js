@@ -4,6 +4,7 @@ import { Video } from "../models/video.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { AsyncHandler } from "../utils/AsyncHandler.js";
+import { raw } from "express";
 
 const createPlaylist = AsyncHandler(async (req, res) => {
     const {name , description} = req.body;
@@ -175,12 +176,10 @@ const deletePlaylist = AsyncHandler(async (req, res) => {
 })
 
 const updatePlaylist = AsyncHandler(async (req, res) => {
-    // update playlist and write the routes
-
     const { name , description } = req.body;
     const { playlistId } = req.params;
 
-    if ([name , description].some((field) => typeof field === "string" || field?.trim() === "")) {
+    if ([name , description].some((field) => typeof field !== "string" || field?.trim() === "")) {
         throw new ApiError(400 , "Name and description are required.")
     }
 

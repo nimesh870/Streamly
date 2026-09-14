@@ -29,4 +29,8 @@ app.use("/api/v1/videos" , videoRouter)
 import playlistRouter from "./routes/playlist.route.js";
 app.use("/api/v1/playlist" , playlistRouter)
 
+// import and configure tweet router
+import tweetRouter from "./routes/tweet.route.js";
+app.use("/api/v1/tweet" , tweetRouter)
+
 export default app;

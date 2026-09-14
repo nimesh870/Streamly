@@ -33,7 +33,7 @@ const getUserTweetById = AsyncHandler( async (req , res) => {
     }
 
     const userTweets = await Tweet.findOne({
-        _id : userId,
+        owner : userId,
     }).sort({createdAt : -1})
 
     if (!userTweets) {

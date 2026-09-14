@@ -29,7 +29,7 @@ const getUserTweetById = AsyncHandler( async (req , res) => {
     const { userId } = req.params;
 
     if (!userId || mongoose.Types.ObjectId.isValid(userId)) {
-        throw new ApiError(400 , "Invalid tweet id.")
+        throw new ApiError(400 , "Invalid user id.")
     }
 
     const userTweets = await Tweet.findOne({

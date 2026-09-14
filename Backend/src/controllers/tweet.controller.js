@@ -87,7 +87,7 @@ const updateTweet = AsyncHandler( async (req , res) => {
 const deleteTweet = AsyncHandler( async (req , res) => {
     const { tweetId } = req.params;
 
-    if (!tweetId || mongoose.Types.ObjectId.isValid(tweetId)) {
+    if (!tweetId || !mongoose.Types.ObjectId.isValid(tweetId)) {
         throw new ApiError(400 , "Invalid tweet id.")
     }
 

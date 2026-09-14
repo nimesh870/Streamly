@@ -41,7 +41,7 @@ const getUserTweetById = AsyncHandler( async (req , res) => {
     }
 
     return res.status(200).json(
-        new ApiResponse(200 , userTweets , "User tweets found.")
+        new ApiResponse(200 , "User tweets found." , userTweets)
     )
 
 })
@@ -80,7 +80,7 @@ const updateTweet = AsyncHandler( async (req , res) => {
     }
 
     return res.status(200).json(
-        new ApiResponse(200 , updatedContent , "Content updated successfully.")
+        new ApiResponse(200 , "Content updated successfully." , updatedContent)
     )
 })
 
@@ -101,7 +101,7 @@ const deleteTweet = AsyncHandler( async (req , res) => {
     }
 
     return res.status(200).json(
-        new ApiResponse(200 , deletionOfTweet , "Tweet deletion successful.")
+        new ApiResponse(200 , "Tweet deletion successful." , deletionOfTweet)
     )
 })
 

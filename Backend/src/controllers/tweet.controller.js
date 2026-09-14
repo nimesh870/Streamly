@@ -32,7 +32,7 @@ const getUserTweetById = AsyncHandler( async (req , res) => {
         throw new ApiError(400 , "Invalid user id.")
     }
 
-    const userTweets = await Tweet.findOne({
+    const userTweets = await Tweet.find({
         owner : userId,
     }).sort({createdAt : -1})
 

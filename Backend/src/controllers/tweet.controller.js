@@ -25,11 +25,17 @@ const createTweet = AsyncHandler( async (req , res) => {
     )
 })
 
-const getUserTweet = AsyncHandler( async (req , res) => {
+const getUserTweetById = AsyncHandler( async (req , res) => {
+    const { tweetId } = req.params;
 
-    const userTweets = await Tweet.find({
+    if (!tweetId || mongoose.Types.ObjectId.isValid(tweetId)) {
+        throw new ApiError(400 , "Invalid tweet id.")
+    }
+
+    const userTweets = await Tweet.findOne({
+        _id : tweetId,
         owner : req.user._id
-    })
+    }).sort({createdAt : -1})
 
     if (!userTweets) {
         throw new ApiError(404 , "No tweets found.")
@@ -102,7 +108,7 @@ const deleteTweet = AsyncHandler( async (req , res) => {
 
 export {
     createTweet,
-    getUserTweet,
+    getUserTweetById,
     updateTweet,
     deleteTweet
 }

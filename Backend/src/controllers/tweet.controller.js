@@ -41,7 +41,46 @@ const getUserTweet = AsyncHandler( async (req , res) => {
 
 })
 
+const updateTweet = AsyncHandler( async (req , res) => {
+    const { tweetId } = req.params;
+    const { newContent } = req.body;
+
+    if (!tweetId || !mongoose.Types.ObjectId.isValid(tweetId)) {
+        throw new ApiError(400 , "Invalid tweet id.")
+    }
+
+    if (typeof newContent !== "string" || newContent?.trim() === "") {
+        throw new ApiError(400 , "Content is required.")
+    }
+
+    const updatedContent = await Tweet.findOneAndUpdate(
+        {
+            _id : tweetId,
+            owner : req.user._id
+        },
+
+        {
+            $set : {
+                content : newContent.trim()
+            }
+        },
+
+        {
+            returnDocument : "after"
+        }
+    )
+
+    if (!updatedContent) {
+        throw new ApiError(404 , "Error occured while updating content.")
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200 , updatedContent , "Content updated successfully.")
+    )
+})
+
 export {
     createTweet,
-    getUserTweet
+    getUserTweet,
+    updateTweet,
 }

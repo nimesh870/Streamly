@@ -26,15 +26,14 @@ const createTweet = AsyncHandler( async (req , res) => {
 })
 
 const getUserTweetById = AsyncHandler( async (req , res) => {
-    const { tweetId } = req.params;
+    const { userId } = req.params;
 
-    if (!tweetId || mongoose.Types.ObjectId.isValid(tweetId)) {
+    if (!userId || mongoose.Types.ObjectId.isValid(userId)) {
         throw new ApiError(400 , "Invalid tweet id.")
     }
 
     const userTweets = await Tweet.findOne({
-        _id : tweetId,
-        owner : req.user._id
+        _id : userId,
     }).sort({createdAt : -1})
 
     if (!userTweets) {

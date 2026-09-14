@@ -11,10 +11,6 @@ const createTweet = AsyncHandler( async (req , res) => {
         throw new ApiError(400 , "Content is required.")
     }
 
-    if (!req.user?._id) {
-        throw new ApiError(404 , "No authenticated user found.")
-    }
-
     const tweet = await Tweet.create({
         content,
         owner : req.user._id
@@ -29,6 +25,23 @@ const createTweet = AsyncHandler( async (req , res) => {
     )
 })
 
+const getUserTweet = AsyncHandler( async (req , res) => {
+
+    const userTweets = await Tweet.find({
+        owner : req.user._id
+    })
+
+    if (!userTweets) {
+        throw new ApiError(404 , "No tweets found.")
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200 , userTweets , "User tweets found.")
+    )
+
+})
+
 export {
-    createTweet
+    createTweet,
+    getUserTweet
 }

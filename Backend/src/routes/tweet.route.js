@@ -19,4 +19,5 @@ tweetRouter.route("/user/:userId").get(verifyJWT , getUserTweetById)
 tweetRouter.route("/:tweetId")
     .patch(verifyJWT , updateTweet)
     .delete(verifyJWT , deleteTweet)
+    
 export default tweetRouter;

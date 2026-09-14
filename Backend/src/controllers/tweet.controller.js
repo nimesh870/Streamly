@@ -21,7 +21,7 @@ const createTweet = AsyncHandler( async (req , res) => {
     }
 
     return res.status(201).json(
-        new ApiResponse(201 , tweet , "Tweet created successfully.")
+        new ApiResponse(201 , "Tweet created successfully." , tweet)
     )
 })
 

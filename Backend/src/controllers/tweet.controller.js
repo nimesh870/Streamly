@@ -79,8 +79,30 @@ const updateTweet = AsyncHandler( async (req , res) => {
     )
 })
 
+const deleteTweet = AsyncHandler( async (req , res) => {
+    const { tweetId } = req.params;
+
+    if (!tweetId || mongoose.Types.ObjectId.isValid(tweetId)) {
+        throw new ApiError(400 , "Invalid tweet id.")
+    }
+
+    const deletionOfTweet = await Tweet.findOneAndDelete({
+        _id : tweetId,
+        owner : req.user._id
+    })
+
+    if (!deletionOfTweet) {
+        throw new ApiError(404 , "Tweet doesnot exist or you dont own this tweet.")
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200 , deletionOfTweet , "Tweet deletion successful.")
+    )
+})
+
 export {
     createTweet,
     getUserTweet,
     updateTweet,
+    deleteTweet
 }

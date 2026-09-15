@@ -125,8 +125,50 @@ const toggleTweetLike =  AsyncHandler( async (req , res) => {
 
 })
 
+const getLikedVideos = AsyncHandler( async (req , res) => {
+    
+    const likedVideos = await Like.aggregate(
+        [
+            {
+                $match : {
+                    likedBy : req.user._id,
+                    video : { $exists : true }
+                }
+            },
+
+            {
+                $lookup : {
+                    from : "videos",
+                    localField : "video",
+                    foreignField : "_id",
+                    as : "videoDetails"
+                }
+            },
+
+            {
+                $unwind : "$videoDetails"
+            },
+
+            {
+                $replaceRoot : {
+                    $newRoot : "$videoDetails"
+                }
+            }
+        ]
+    );
+
+    if (likedVideos.length === 0) {
+        throw new ApiError(404 , "User has not liked any videos yet.")
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200 , "Liked videos fetched successfully." , likedVideos)
+    )
+})
+
 export {
     toggleCommentLike,
     toggleVideoLike,
-    toggleTweetLike
+    toggleTweetLike,
+    getLikedVideos
 }

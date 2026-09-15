@@ -1,10 +1,11 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 import { Like } from "../models/likes.models.js";
 import { Comment } from "../models/comment.models.js"
 import { AsyncHandler } from "../utils/AsyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Video } from "../models/video.model.js";
+import { Tweet } from "../models/tweet.models.js";
 
 const toggleCommentLike = AsyncHandler( async (req , res) => {
     const { commentId } = req.params;
@@ -44,7 +45,7 @@ const toggleCommentLike = AsyncHandler( async (req , res) => {
     )
 })
 
-const toggleVideoIdLike = AsyncHandler( async (req , res) => {
+const toggleVideoLike = AsyncHandler( async (req , res) => {
     const { videoId } = req.params;
 
     if (!videoId || !mongoose.Types.ObjectId.isValid(videoId)) {
@@ -80,9 +81,48 @@ const toggleVideoIdLike = AsyncHandler( async (req , res) => {
 
 })
 
-cosnt 
+const toggleTweetLike =  AsyncHandler( async (req , res) => {
+    const { tweetId } = req.params;
+
+    if (!tweetId || !mongoose.Types.ObjectId.isValid(tweetId)) {
+        throw new ApiError(400 , "Invalid tweet id.")
+    }
+
+    const tweet = await Tweet.findById(tweetId);
+
+    if (!tweet) {
+        throw new ApiError(404 , "Tweet doesnot exist.")
+    }
+
+    const existingLike = await Like.findOne({
+        tweet : tweetId,
+        likedBy : req.user._id
+    });
+
+    if (existingLike) {
+        await Like.deleteOne({
+            tweet : tweetId,
+            likedBy : req.user._id
+        })
+
+        return res.status(200).json(
+            new ApiResponse(200 , "Tweet unliked successfully.")
+        )
+    }
+
+    await Like.create({
+        tweet : tweetId,
+        likedBy : req.user._id
+    })
+
+    return res.status(201).json(
+        new ApiResponse(201 , "Tweet liked successfully." , null)
+    )
+
+})
 
 export {
     toggleCommentLike,
-    toggleVideoIdLike
+    toggleVideoLike,
+    toggleTweetLike
 }

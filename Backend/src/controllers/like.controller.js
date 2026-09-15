@@ -44,7 +44,7 @@ const toggleCommentLike = AsyncHandler( async (req , res) => {
     )
 })
 
-const toggleVideoId = AsyncHandler( async (req , res) => {
+const toggleVideoIdLike = AsyncHandler( async (req , res) => {
     const { videoId } = req.params;
 
     if (!videoId || !mongoose.Types.ObjectId.isValid(videoId)) {
@@ -80,7 +80,9 @@ const toggleVideoId = AsyncHandler( async (req , res) => {
 
 })
 
+cosnt 
+
 export {
     toggleCommentLike,
-    toggleVideoId
+    toggleVideoIdLike
 }

@@ -54,6 +54,10 @@ const toggleVideoLike = AsyncHandler( async (req , res) => {
 
     const video = await Video.findById(videoId);
 
+    if (!video) {
+        throw new ApiError(404 , "Video doesnot exists.")
+    }
+
     const existingLike = await Like.findOne({
         video : videoId,
         likedBy : req.user._id

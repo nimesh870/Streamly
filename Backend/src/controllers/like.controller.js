@@ -17,7 +17,7 @@ const toggleCommentLike = AsyncHandler( async (req , res) => {
     const comment = await Comment.findById(commentId)
 
     if (!comment) {
-        throw new ApiError(404 , "No comment found.")
+        throw new ApiError(404 , "Comment doesnot exists.")
     }
 
     const existingLike = await Like.findOne({

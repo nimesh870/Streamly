@@ -60,7 +60,29 @@ const getUserChannelSubscribers = AsyncHandler( async (req , res) => {
 
 })
 
+const getSubscribedChannels = AsyncHandler( async (req , res) => {
+    const { subscriberId } = req.params;
+
+    if (!subscriberId || !mongoose.Types.ObjectId.isValid(subscriberId)) {
+        throw new ApiError(400 , "Invalid subscriber id.")
+    }
+
+    const channelSubscribed = await Subscription.find({
+        subscriber : subscriberId
+    }).populate("channel" , "username fullname avatar")
+
+    if (channelSubscribed.length === 0) {
+        throw new ApiError(404 , "You have not subscribed anyone yet.")
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200 , "Subscribed channel fetched successfully." , channelSubscribed)
+    )
+
+})
+
 export {
     toggleSubscribe,
-    getUserChannelSubscribers
+    getUserChannelSubscribers,
+    getSubscribedChannels 
 }

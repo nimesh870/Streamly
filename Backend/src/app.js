@@ -37,4 +37,8 @@ app.use("/api/v1/tweet" , tweetRouter)
 import likeRouter from "./routes/like.route.js";
 app.use("/api/v1/like" , likeRouter)
 
+// import and configure subscription router
+import subscriptionRouter from "./routes/subscription.model.js";
+app.use("/api/v1/subscription" , subscriptionRouter)
+
 export default app;

@@ -33,4 +33,8 @@ app.use("/api/v1/playlist" , playlistRouter)
 import tweetRouter from "./routes/tweet.route.js";
 app.use("/api/v1/tweet" , tweetRouter)
 
+// import and configure like router
+import likeRouter from "./routes/like.route.js";
+app.use("/api/v1/like" , likeRouter)
+
 export default app;

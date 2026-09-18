@@ -113,8 +113,33 @@ const updateComment = AsyncHandler( async (req , res) => {
 
 })
 
+const deleteComment = AsyncHandler( async (req , res) => {
+    const { commentId } = req.params;
+
+    if (!commentId || !mongoose.Types.ObjectId.isValid(commentId)) {
+        throw new ApiError(400 , "Invalid comment id.")
+    }
+
+    const deleteComment = await Comment.findOneAndDelete(
+        {
+            _id : commentId,
+            owner : req.user._id
+        }
+    )
+
+    if (!deleteComment) {
+        throw new ApiError(500 , "Error while deleting comment.")
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200 , "Comment deleted successfully.")
+    )
+    
+})
+
 export {
     addCommentToVideo,
     addCommentToTweet,
-    updateComment
+    updateComment,
+    deleteComment
 }

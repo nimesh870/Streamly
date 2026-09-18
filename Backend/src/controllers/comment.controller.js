@@ -60,7 +60,8 @@ const addCommentToTweet = AsyncHandler( async (req , res) => {
 
     const comment = await Comment.create({
         content : content.trim(),
-        tweet : tweetId
+        tweet : tweetId,
+        owner : req.user._id
     })
 
     if (!comment) {
@@ -73,7 +74,47 @@ const addCommentToTweet = AsyncHandler( async (req , res) => {
 
 })
 
+const updateComment = AsyncHandler( async (req , res) => {
+    const { commentId } = req.params;
+    const { newContent } = req.body;
+
+    if (!commentId || !mongoose.Types.ObjectId.isValid(commentId)) {
+        throw new ApiError(400 , "Invalid comment id.")
+    }
+
+    if (typeof newContent !== "string" || newContent?.trim() === "") {
+        throw new ApiError(400 , "Comment content is required.")
+    }
+
+    const updateComment = await Comment.findOneAndUpdate(
+        {
+            _id : commentId,
+            owner : req.user._id
+        },
+
+        {
+            $set : {
+                content : newContent?.trim()
+            }
+        },
+
+        {
+            returnDocument : "after"
+        }
+    )
+
+    if (!updateComment) {
+        throw new ApiError(500 , "Error while updating comment.")
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200 , "Comment updated successfully." , updateComment)
+    )
+
+})
+
 export {
     addCommentToVideo,
-    addCommentToTweet
+    addCommentToTweet,
+    updateComment
 }

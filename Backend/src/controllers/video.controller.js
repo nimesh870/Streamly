@@ -45,6 +45,10 @@ const publishVideo = AsyncHandler( async (req , res) => {
         owner : req.user._id
     })
 
+    if (!uploadVideo) {
+        throw new ApiError(500 , "Error while uploading video.")
+    }
+
     return res.status(200).json(
         new ApiResponse(200 , uploadVideo , "Video uploaded successfully.")
     )

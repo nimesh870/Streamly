@@ -1,5 +1,6 @@
 import { Comment } from "../models/comment.models.js";
 import { Video } from "../models/video.model.js"
+import { Tweet } from "../models/tweet.models.js";
 import { AsyncHandler } from "../utils/AsyncHandler.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js"
@@ -34,12 +35,45 @@ const addCommentToVideo = AsyncHandler( async (req , res) => {
     }
 
     return res.status(201).json(
-        new ApiResponse(201 , comment , "Successfully commented on a video.")
+        new ApiResponse(201 , "Successfully commented on a video." , comment)
     )
 
 })
 
+const addCommentToTweet = AsyncHandler( async (req , res) => {
+    const { tweetId } = req.params;
+    const { content } = req.body;
+
+    if (!tweetId || !mongoose.Types.ObjectId.isValid(tweetId)) {
+        throw new ApiError(400 , "Invalid tweet id.")
+    }
+
+    if (typeof content !== "string" || content?.trim() === "") {
+        throw new ApiError(400 , "Comment content is required.")
+    }
+
+    const tweet = await Tweet.findById(tweetId);
+
+    if (!tweet) {
+        throw new ApiError(404 , "No tweet found.")
+    }
+
+    const comment = await Comment.create({
+        content : content.trim(),
+        tweet : tweetId
+    })
+
+    if (!comment) {
+        throw new ApiError(500 , "Error while creating comment.")
+    }
+
+    return res.status(201).json(
+        new ApiResponse(201 , "Commented successfully on tweet." , comment)
+    )
+
+})
 
 export {
-    addCommentToVideo
+    addCommentToVideo,
+    addCommentToTweet
 }

@@ -38,7 +38,10 @@ import likeRouter from "./routes/like.route.js";
 app.use("/api/v1/like" , likeRouter)
 
 // import and configure subscription router
-import subscriptionRouter from "./routes/subscription.model.js";
+import subscriptionRouter from "./routes/subscription.routes.js";
 app.use("/api/v1/subscription" , subscriptionRouter)
+
+import commentRouter from "./routes/comment.route.js";
+app.use("/api/v1/comment" , commentRouter)
 
 export default app;

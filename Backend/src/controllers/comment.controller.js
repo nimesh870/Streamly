@@ -173,7 +173,7 @@ const getVideoComments = AsyncHandler( async (req , res) => {
         ]
     )
 
-    if (videoComments.length === 0) {
+    if (videoComments?.length === 0) {
         return res.status(200).json(
             new ApiResponse(200 , "No comments yet." , [])
         )
@@ -185,10 +185,57 @@ const getVideoComments = AsyncHandler( async (req , res) => {
     
 })
 
+const getTweetComment = AsyncHandler( async (req , res) => {
+    const { tweetId } = req.params;
+
+    if (!tweetId || !mongoose.Types.ObjectId.isValid(tweetId)) {
+        throw new ApiError(400 , "Invalid tweet id.")    
+    }
+
+    const tweet = await Tweet.findById(tweetId);
+
+    if (!tweet) {
+        throw new ApiError(404 , "Tweet not found.")
+    }
+
+    const tweetComment = await Comment.aggregate(
+        [
+            {
+                $match : {
+                    tweet : tweetId
+                }
+            },
+
+            {
+                $lookup : {
+                    from : "users",
+                    localField : "owner",
+                    foreignField : "_id",
+                    as : "ownerDetails"
+                }
+            },
+
+            {
+                $unwind : "$ownerDetails"
+            }
+        ]
+    )
+
+    if (tweetComment?.length === 0) {
+        throw new ApiError(500 , "Error while creating comment.")
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200 , "Comments fetched successfully." , tweetComment)
+    )
+
+})
+
 export {
     addCommentToVideo,
     addCommentToTweet,
     updateComment,
     deleteComment,
-    getVideoComments
+    getVideoComments,
+    getTweetComment
 }

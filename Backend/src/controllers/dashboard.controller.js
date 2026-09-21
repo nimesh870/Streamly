@@ -4,9 +4,15 @@ import { Subscription } from "../models/subscription.models.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { AsyncHandler } from "../utils/AsyncHandler.js";
+import mongoose from "mongoose";
 
 const getChannelVideos = AsyncHandler( async (req , res) => {
     const {page = 1 , limit = 15} = req.query;
+    const {channelId} = req.params;
+
+    if (!channelId || !mongoose.Types.ObjectId.isValid(channelId)) {
+        throw new ApiError(400 , "Invalid channel id.")
+    }
 
     const pageNumber = Math.max(Number(page) , 1);
     const limitNumber = Math.min(Math.max(Number(limit) , 1) , 50)
@@ -22,7 +28,7 @@ const getChannelVideos = AsyncHandler( async (req , res) => {
 
     const [videos , totalVideos] = await Promise.all([
         Video.find({
-            owner : req.user._id
+            owner : channelId
         })
         .sort({createdAt : -1})
         .skip(skip)
@@ -55,6 +61,11 @@ const getChannelVideos = AsyncHandler( async (req , res) => {
 
 })
 
+const getChannelStats = AsyncHandler( async(req , res) => {
+
+})
+
 export {
-    getChannelVideos
+    getChannelVideos,
+    getChannelStats
 }

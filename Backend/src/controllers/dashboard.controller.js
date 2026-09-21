@@ -62,6 +62,56 @@ const getChannelVideos = AsyncHandler( async (req , res) => {
 })
 
 const getChannelStats = AsyncHandler( async(req , res) => {
+    const {channelId} = req.params;
+
+    if (!channelId || !mongoose.Types.ObjectId.isValid(channelId)) {
+        throw new ApiError(400 , "Invalid channel id.")
+    }
+
+    const channel = await Subscription.findById(channelId).select("_id");
+
+    if (!channel) {
+        throw new ApiError(404 , "Channel doesnot exist.")
+    }
+
+    const [videoStats , totalSubs] = await Promise.all([
+        Video.aggregate(
+            [
+                {
+                    $match : {
+                        owner : mongoose.Types.ObjectId(channelId)
+                    }
+                },
+
+                {
+                    $group : {
+                        _id : null,
+                        totalVideos : {$sum : 1},
+                        totalViews : {$sum : "$views"}
+                    }
+                }
+            ]
+        ),
+
+        Subscription.countDocuments({
+            channel : channelId
+        })
+    ])
+
+    const totalVideos = videoStats[0]?.totalVideos || 0;
+    const totalViews = videoStats[0]?.totalViews || 0;
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            "Channel stats fetched successfully.",
+            {
+                totalViews,
+                totalVideos,
+                totalSubs
+            }
+        )
+    )
 
 })
 

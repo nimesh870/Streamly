@@ -101,7 +101,7 @@ const deleteTweet = AsyncHandler( async (req , res) => {
     }
 
     return res.status(200).json(
-        new ApiResponse(200 , "Tweet deletion successful." , deletionOfTweet)
+        new ApiResponse(200 , "Tweet deletion successful." , [])
     )
 })
 

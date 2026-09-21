@@ -154,7 +154,7 @@ const getVideoComments = AsyncHandler( async (req , res) => {
         [
             {
                 $match : {
-                    video : videoId,
+                    video : new mongoose.Types.ObjectId(videoId),
                 }
             },
 
@@ -202,7 +202,7 @@ const getTweetComment = AsyncHandler( async (req , res) => {
         [
             {
                 $match : {
-                    tweet : tweetId
+                    tweet : new mongoose.Types.ObjectId(tweetId)
                 }
             },
 
@@ -222,7 +222,7 @@ const getTweetComment = AsyncHandler( async (req , res) => {
     )
 
     if (tweetComment?.length === 0) {
-        throw new ApiError(500 , "Error while creating comment.")
+        throw new ApiError(500 , "Error while fetching comment." , [])
     }
 
     return res.status(200).json(

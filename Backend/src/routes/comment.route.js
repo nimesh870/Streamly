@@ -19,8 +19,8 @@ commentRouter.route("/:commentId")
         .patch(verifyJWT , updateComment)
         .delete(verifyJWT , deleteComment);
 
-commentRouter.route("/:videoId").get(verifyJWT , getVideoComments);
+commentRouter.route("/video-comments/:videoId").get(verifyJWT , getVideoComments);
 
-commentRouter.route("/:tweetId").get(verifyJWT , getTweetComment)
+commentRouter.route("/tweet-comments/:tweetId").get(verifyJWT , getTweetComment)
 
 export default commentRouter;

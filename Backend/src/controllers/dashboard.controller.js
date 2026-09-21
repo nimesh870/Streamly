@@ -35,7 +35,7 @@ const getChannelVideos = AsyncHandler( async (req , res) => {
         .limit(limitNumber),
 
         Video.countDocuments({
-            owner : req.user._id
+            owner : channelId
         })
     ])
 

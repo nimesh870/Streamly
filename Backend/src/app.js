@@ -41,7 +41,12 @@ app.use("/api/v1/like" , likeRouter)
 import subscriptionRouter from "./routes/subscription.routes.js";
 app.use("/api/v1/subscription" , subscriptionRouter)
 
+// import and configure comment router
 import commentRouter from "./routes/comment.route.js";
 app.use("/api/v1/comment" , commentRouter)
+
+// import and configure dashboard router
+import dashboardRouter from "./routes/dashboard.controller.js";
+app.use("api/v1/stats" , dashboardRouter)
 
 export default app;

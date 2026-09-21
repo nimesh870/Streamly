@@ -79,7 +79,7 @@ const getChannelStats = AsyncHandler( async(req , res) => {
             [
                 {
                     $match : {
-                        owner : mongoose.Types.ObjectId(channelId)
+                        owner : new mongoose.Types.ObjectId(channelId)
                     }
                 },
 

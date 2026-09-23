@@ -126,6 +126,21 @@ const toggleTweetLike =  AsyncHandler( async (req , res) => {
 })
 
 const getLikedVideos = AsyncHandler( async (req , res) => {
+
+    const {limit = 10 , page = 1} = req.query;
+
+    const pageNumber = Number(page);
+    const limitNumber = Number(limit);
+
+    if (!Number.isInteger(pageNumber) || pageNumber < 1) {
+        throw new ApiError(400 , "Page number must a positive integer.")
+    }
+
+    if (!Number.isInteger(limitNumber) || limitNumber < 1 || limitNumber > 50) {
+        throw new ApiError(400 , "Limit must be in between 1 and 50.")
+    }
+
+    const skip = (pageNumber - 1)*limitNumber
     
     const likedVideos = await Like.aggregate(
         [
@@ -134,6 +149,20 @@ const getLikedVideos = AsyncHandler( async (req , res) => {
                     likedBy : req.user._id,
                     video : { $exists : true }
                 }
+            },
+
+            {
+                $sort : {
+                    createdAt : -1
+                }
+            },
+
+            {
+                $skip : skip
+            },
+
+            {
+                $limit : limitNumber
             },
 
             {
@@ -151,7 +180,7 @@ const getLikedVideos = AsyncHandler( async (req , res) => {
 
             {
                 $replaceRoot : {
-                    $newRoot : "$videoDetails"
+                    newRoot : "$videoDetails"
                 }
             }
         ]
@@ -162,7 +191,16 @@ const getLikedVideos = AsyncHandler( async (req , res) => {
     }
 
     return res.status(200).json(
-        new ApiResponse(200 , "Liked videos fetched successfully." , likedVideos)
+        new ApiResponse(200 , "Liked videos fetched successfully." , 
+            {
+                likedVideos,
+                pagination: {
+                    currentPage: pageNumber,
+                    hasNextPage: likedVideos.length === limitNumber,
+                    hasPreviousPage: pageNumber > 1
+                }
+            }
+        )
     )
 })
 

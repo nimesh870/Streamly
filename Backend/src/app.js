@@ -46,7 +46,7 @@ import commentRouter from "./routes/comment.route.js";
 app.use("/api/v1/comment" , commentRouter)
 
 // import and configure dashboard router
-import dashboardRouter from "./routes/dashboard.controller.js";
+import dashboardRouter from "./routes/dashboard.route.js";
 app.use("api/v1/stats" , dashboardRouter)
 
 export default app;

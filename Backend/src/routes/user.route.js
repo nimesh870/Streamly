@@ -10,8 +10,9 @@ import {
     refreshAccessToken, 
     registerUser, 
     updateAvatar,
-     updateCoverImg 
-    } from "../controllers/user.controller.js";
+    updateCoverImg,
+    addVideoToWatchHistory,
+} from "../controllers/user.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();
@@ -46,6 +47,8 @@ router.route("/update-avatar").patch(verifyJWT , upload.single("avatar") , updat
 router.route("/update-coverImage").patch(verifyJWT , upload.single("coverImg") , updateCoverImg)
 
 router.route("/channel/:username").get(verifyJWT , getUserChannelProfile)
+
+router.route("/:videoId/watch-history").post(verifyJWT , addVideoToWatchHistory)
 
 router.route("/Watch-history").get(verifyJWT , getWatchHistory)
 

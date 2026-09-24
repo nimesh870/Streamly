@@ -4,6 +4,7 @@ import { User } from "../models/user.model.js"
 import { deleteFile, uploadFile } from "../utils/cloudinaryService.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
 import mongoose from "mongoose";
+import { Video } from "../models/video.model.js";
 
 // generating tokens
 const generateAccessAndRefreshToken = async (userId) => {
@@ -405,6 +406,52 @@ const getUserChannelProfile = AsyncHandler( async (req , res) => {
     )
 })
 
+const addVideoToWatchHistory = AsyncHandler( async (req , res) => {
+    const { videoId } = req.params;
+
+    if (!videoId || !mongoose.Types.ObjectId.isValid(videoId)) {
+        throw new ApiError(400 , "Invalid video id.")
+    }
+
+    const video = await Video.findById(videoId);
+
+    if (!video) {
+        throw new ApiError(404 , "No video found.")
+    }
+
+    await User.findByIdAndUpdate(
+        {
+            _id : req.user._id
+        },
+
+        {
+            $pull : {
+                watchHistory : videoId
+            }
+        }
+    )
+
+    await User.findByIdAndUpdate(
+        {
+            _id : req.user._id
+        },
+
+        {
+            $push : {
+                watchHistory : {
+                    $each : [videoId],
+                    position : 0
+                }
+            }
+        }
+    )
+
+    return res.status(200).json(
+        new ApiResponse(200 , "Video added to watch history successfully.")
+    )
+
+})
+
 const getWatchHistory = AsyncHandler( async (req , res) => {
     const user = await User.aggregate([
         {
@@ -466,5 +513,6 @@ export {
     updateAvatar,
     updateCoverImg,
     getUserChannelProfile,
+    addVideoToWatchHistory,
     getWatchHistory
 }

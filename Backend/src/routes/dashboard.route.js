@@ -9,8 +9,8 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const dashboardRouter = Router();
 
-dashboardRouter.route("/:channelId")
-    .get(verifyJWT , getChannelStats)
-    .get(verifyJWT , getChannelVideos)
+dashboardRouter.route("/s/:channelId").get(verifyJWT , getChannelStats)
+
+dashboardRouter.route("/v/:channelId").get(verifyJWT , getChannelVideos)
 
 export default dashboardRouter;

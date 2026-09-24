@@ -497,6 +497,16 @@ const getWatchHistory = AsyncHandler( async (req , res) => {
         }
     ])
 
+    if (user?.length === 0 || user[0]?.watchHistory === 0) {
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                "No videos in watch history yet.",
+                []
+            )
+        )
+    }
+
     return res.status(200).json(
         new ApiResponse(200 , user[0].watchHistory , "watch history fetched successfully.")
     )

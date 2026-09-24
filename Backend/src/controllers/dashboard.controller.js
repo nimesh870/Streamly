@@ -68,7 +68,11 @@ const getChannelStats = AsyncHandler( async(req , res) => {
         throw new ApiError(400 , "Invalid channel id.")
     }
 
-    const channel = await Subscription.findById(channelId).select("_id");
+    const channel = await Subscription.findOne(
+        {
+            channel : channelId
+        }
+    ).select("_id");
 
     if (!channel) {
         throw new ApiError(404 , "Channel doesnot exist.")

@@ -44,18 +44,18 @@ const getChannelVideos = AsyncHandler( async (req , res) => {
     return res.status(200).json(
         new ApiResponse(
             200,
-            "Videos fetched successfully."
-        ),
-        {
-            videos,
-            pagination : {
-                currentPage : pageNumber,
-                totalPages,
-                totalVideos,
-                hasNextPage : totalPages > pageNumber,
-                hasPreviousPage : pageNumber > 1
-            }
+            "Videos fetched successfully.",
+            {
+                videos,
+                pagination : {
+                    currentPage : pageNumber,
+                    totalPages,
+                    totalVideos,
+                    hasNextPage : totalPages > pageNumber,
+                    hasPreviousPage : pageNumber > 1
+                }
         }
+        ),
     )
 
 

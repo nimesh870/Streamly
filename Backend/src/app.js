@@ -51,6 +51,6 @@ app.use("/api/v1/stats" , dashboardRouter)
 
 // import and configure healthcheck router
 import { healthCheck } from "./controllers/healthcheck.controller.js";
-app.use("/api/v1/healthCheck" , healthCheck);
+app.use("/api/v1/health" , healthCheck);
 
 export default app;

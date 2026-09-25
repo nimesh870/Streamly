@@ -49,4 +49,8 @@ app.use("/api/v1/comment" , commentRouter)
 import dashboardRouter from "./routes/dashboard.route.js";
 app.use("/api/v1/stats" , dashboardRouter)
 
+// import and configure healthcheck router
+import { healthCheck } from "./controllers/healthcheck.controller.js";
+app.use("/api/v1/healthCheck" , healthCheck);
+
 export default app;
